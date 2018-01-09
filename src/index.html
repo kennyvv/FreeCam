@@ -28,109 +28,313 @@
         <div class="navbar-collapse collapse" id="navbar2">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="#">Join Audio</a>
+              <a class="nav-link" href="#" id="joinAudio">Join Audio</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Join Video</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="#">Invite</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Participants</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Share Screen</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Chat</a>
+              <a class="nav-link" href="#" id="joinVideo">Join Video</a>
             </li>
           </ul>
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#" style="color: red; font-weight: bold;">Leave Meeting</a>
+              <a class="nav-link" href="#" id="inviteButton">Invite</a>
+            </li>
+          <!--  <li class="nav-item">
+              <a class="nav-link" href="#" id="participantsButton">Participants</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="screenShareButton">Share Screen</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="chatButton">Chat</a>
+            </li> -->
+          </ul>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="leaveMeeting" style="color: red; font-weight: bold;">Leave Meeting</a>
             </li>
           </ul>
         </div>
       </div>
     </div>
 
-
-      <div class="camera-container">
-        <div class="camera-wrap"></div>
-        <div class="camera-wrap"></div>
-        <div class="camera-wrap"></div>
-        <div class="camera-wrap"></div>
-        <div class="camera-wrap"></div>
+      <div class="camera-container" id="cameras">
+        <div class="camera-wrap">
+          <video id="localVideo" oncontextmenu="return false;"></video>
+        </div>
       </div>
 
+    <div class="modal bd-example-modal-lg" data-backdrop="static" id="joinRoomModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Join Meeting</h5>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="recipient-name" class="form-control-label">Username:</label>
+                <input type="text" class="form-control" id="usernameInput">
+              </div>
+              <div class="form-group">
+                <label for="message-text" class="form-control-label">Meeting ID:</label>
+                <input type="text" class="form-control" id="meetingIdInput"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+            <button type="button" class="btn btn-primary" id="joinMeetingButton">Join</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="showInviteLinkModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Invite People</h5>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="recipient-name" class="form-control-label">Meeting Link:</label>
+                <input type="text" class="form-control" style="color: white;" id="meetingLinkInput" readonly=readonly>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
-
+    <script src="js/simplewebrtc.bundle.js"></script>
     <script type="text/javascript">
-      $(document).ready(function () {
+    var room = location.search && location.search.split('?')[1];
 
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        function makeEqualSize() {
-          var wrap = $('.camera-container');
-          var elements = $(".camera-container").find('.camera-wrap');
-
-          var windowWidth = wrap.width() - (count * margin);
-          var windowHeight = wrap.height() - (count * margin);
-
-          var rows = Math.floor(Math.sqrt(count));
-          var cols = Math.ceil(Math.sqrt(count));
-
-          var elWidth = ((windowWidth - (count * margin))  / cols);
-          var elHeight = ((windowHeight - (count * margin)) / cols);
-
-          elements.css({
-            width: elWidth + "px",
-            height: elHeight + "px"
+          // create our webrtc connection
+          var webrtc = new SimpleWebRTC({
+              // the id/element dom element that will hold "our" video
+              localVideoEl: 'localVideo',
+              // the id/element dom element that will hold remote videos
+              remoteVideosEl: '',
+              // immediately ask for camera access
+              autoRequestMedia: true,
+              debug: false,
+              detectSpeakingEvents: true
           });
 
-        }
+          // when it's ready, join if we got a room from the URL
+          webrtc.on('readyToCall', function () {
+              // you can name it anything
+              if (room) {
+                webrtc.joinRoom(room);
+              }else {
+                $('#joinRoomModal').modal();
+              }
+          });
 
-        function doTick() {
-          var count = getRandomInt(1,24);
-          var wrap = $('.camera-container');
-          var margin = 6;
-
-          var windowWidth = wrap.width() - (count * margin);
-          var windowHeight = wrap.height() - (count * margin);
-
-          var rows = Math.floor(Math.sqrt(count));
-          var cols = Math.ceil(Math.sqrt(count));
-
-          var elWidth = ((windowWidth - (count * margin))  / cols);
-          var elHeight = ((windowHeight - (count * margin)) / cols);
-
-          //var elHeight = elWidth * 0.5625;// (windowHeight / cols);
-          //We do * 0.5625 because we want to keep an 16:9 aspect ratio.
-          //TODO: Keep aspect ratio...
-
-          console.log("Width: " + elWidth + " Height: " + elHeight + " Cols: " + cols + " Rows: " + rows);
-
-          wrap.html("");
-
-          for (var i = 0; i < count; i++) {
-            wrap.append("<div class='camera-wrap' style='width:" + elWidth + "px;height: "+ elHeight + "px;'><div class='camera-video'>  </div></div>");
+          function showVolume(el, volume) {
+            /*  if (!el) return;
+              if (volume < -45) { // vary between -45 and -20
+                  el.style.height = '0px';
+              } else if (volume > -20) {
+                  el.style.height = '100%';
+              } else {
+                  el.style.height = '' + Math.floor((volume + 100) * 100 / 25 - 220) + '%';
+              }*/
           }
-        }
+          webrtc.on('channelMessage', function (peer, label, data) {
+              if (data.type == 'volume') {
+                  showVolume(document.getElementById('volume_' + peer.id), data.volume);
+              }
+          });
+          webrtc.on('videoAdded', function (video, peer) {
+              console.log('video added', peer);
+              var remotes = document.getElementById('cameras');
+              if (remotes) {
+                  var d = document.createElement('div');
+                  d.className = 'camera-wrap';
+                  d.id = 'container_' + webrtc.getDomId(peer);
+                  d.appendChild(video);
+                  //var vol = document.createElement('div');
+                //  vol.id = 'volume_' + peer.id;
+              //    vol.className = 'volume_bar';
+              //    video.onclick = function () {
+              //        video.style.width = video.videoWidth + 'px';
+              //        video.style.height = video.videoHeight + 'px';
+            //      };
+              //    d.appendChild(vol);
+                  remotes.appendChild(d);
+              }
 
+              makeEqualSize();
+          });
+          webrtc.on('videoRemoved', function (video, peer) {
+              console.log('video removed ', peer);
+              var remotes = document.getElementById('cameras');
+              var el = document.getElementById('container_' + webrtc.getDomId(peer));
+              if (remotes && el) {
+                  remotes.removeChild(el);
+              }
+
+              makeEqualSize();
+          });
+          webrtc.on('volumeChange', function (volume, treshold) {
+              //console.log('own volume', volume);
+              showVolume(document.getElementById('localVolume'), volume);
+          });
+
+          // Since we use this twice we put it here
+          function setRoom(name) {
+              /*$('form').remove();
+              $('h1').text(name);
+              $('#subTitle').text('Link to join: ' + location.href);
+              $('body').addClass('active'); */
+
+              var newUrl = location.pathname + '?' + name;
+              history.replaceState({foo: 'bar'}, null, newUrl);
+              $('#meetingLinkInput')[0].value = newUrl;
+          }
+
+          if (room) {
+              setRoom(room);
+          } else {
+              $('#joinRoomModal').modal();
+          }
+
+          var videoToggle = $('#joinVideo'),
+             setVideo = function(bool) {
+               videoToggle.text(bool ? 'Join Video' : 'Leave Video');
+             };
+
+         videoToggle.click(function () {
+           if (webrtc.webrtc.isVideoEnabled()){
+             webrtc.pauseVideo();
+           }else{
+             webrtc.resumeVideo();
+           }
+         });
+
+          var audioToggle = $('#joinAudio'),
+             setAudio = function(bool) {
+               audioToggle.text(bool ? 'Join Audio' : 'Leave Audio');
+             };
+
+         audioToggle.click(function () {
+           if (webrtc.webrtc.isAudioEnabled()){
+             webrtc.mute();
+           }else{
+             webrtc.unmute();
+           }
+         });
+
+         webrtc.on('audioOn', function () {
+           setAudio(false);
+         });
+         webrtc.on('audioOff', function () {
+             setAudio(true);
+         });
+         webrtc.on('videoOn', function () {
+             setVideo(false);
+         });
+         webrtc.on('videoOff', function () {
+             setVideo(true);
+         });
+
+          var button = $('#screenShareButton'),
+              setButton = function (bool) {
+                  button.text(bool ? 'Share Screen' : 'Stop Sharing');
+              };
+          webrtc.on('localScreenStopped', function () {
+              setButton(true);
+          });
+
+          setButton(true);
+          setAudio(false);
+          setVideo(false);
+
+          button.click(function () {
+              if (webrtc.getLocalScreen()) {
+                  webrtc.stopScreenShare();
+                  setButton(true);
+              } else {
+                  webrtc.shareScreen(function (err) {
+                      if (err) {
+                          setButton(true);
+                      } else {
+                          setButton(false);
+                      }
+                  });
+
+              }
+          });
+
+          $('#leaveMeeting').click(function () {
+            webrtc.leaveRoom();
+            webrtc.pauseVideo();
+            $('#joinRoomModal').modal();
+          });
+
+          $('#joinMeetingButton').click(function () {
+            var name = $('#meetingIdInput')[0].value;
+            webrtc.joinRoom(name);
+            setRoom(name);
+            webrtc.resumeVideo();
+            $('#joinRoomModal').modal('hide');
+          });
+
+          $('#inviteButton').click(function () {
+            $('#showInviteLinkModal').modal('toggle');
+          });
+
+          $('#meetingLinkInput').click(function () {
+            $(this).select();
+          });
+
+          function getRandomInt(min, max) {
+              return Math.floor(Math.random() * (max - min + 1)) + min;
+          }
+
+          function makeEqualSize() {
+            var wrap = $('.camera-container');
+            var elements = $(".camera-container").find('.camera-wrap');
+
+            var count = elements.length;
+            var margin = 6;
+            var windowWidth = wrap.width() - (count * margin);
+            var windowHeight = wrap.height() - (count * margin);
+
+            var rows = Math.floor(Math.sqrt(count));
+            var cols = Math.ceil(Math.sqrt(count));
+
+            var elWidth = ((windowWidth - (count * margin))  / cols);
+          //  var elHeight = ((windowHeight - (count * margin)) / rows);
+            var elHeight = elWidth * 0.5625;
+
+            if (windowWidth * 1.5625 < windowHeight){
+              elHeight = ((windowWidth - (count * margin)) / cols);
+              elWidth = ((windowHeight - (count * margin)) / rows);
+            }
+
+            elements.css({
+              width: elWidth + "px",
+              height: elHeight + "px"
+            });
+
+          }
+
+      $(document).ready(function () {
         $(window).resize(function (e) {
           makeEqualSize();
         });
 
-        setInterval(doTick, 5000);
-        doTick();
+        makeEqualSize()
       });
     </script>
 
