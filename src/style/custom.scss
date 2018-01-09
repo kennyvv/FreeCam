@@ -131,6 +131,10 @@ $mq-desktop				: 1382px !default;
 	}
 }
 
+html {
+//  height: 100%;
+}
+
 body {
   background-color: #222;
   height: 100%;
@@ -140,26 +144,32 @@ body {
 .camera-container {
   width: 100vw;
   height: 90vh;
-  overflow: hidden;
   margin-top: 15px;
-//  margin-bottom: 50px;
-  //text-align: center;
-  //bottom: 15%;
   display: flex;
   justify-content: center;
   align-items: center;
-   flex-wrap: wrap;
+  flex-wrap: wrap;
 
-  @include mobile-only {
-       flex-direction: row;
-     }
+  @include mobile-portrait-and-below {
+    flex-direction: row;
+    overflow: auto;
+  }
+
+  @include tablet-landscape-and-below {
+    flex-direction: row;
+    overflow: auto;
+  }
+
+  @include  tablet-landscape-and-up {
+    overflow: hidden;
+  }
 
    .camera-wrap {
-    width: 100%;
-    height: 100%;
     margin: 6px;
     border-radius: 4px;
     text-align: center;
+    position:relative;
+    z-index:0;
     //display: inline-block;
     video {
       background-image: url('../images/buddy.svg');
@@ -168,8 +178,47 @@ body {
 	    background-repeat: no-repeat;
       width: auto;
       height: 100%;
-      border-radius: 4px;
+      border-radius: 10px;
       border: 2px solid black;
+      z-index:1;
+      position:relative;
+    }
+
+    .username {
+      position:absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index:2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
     }
   }
 }
+
+#load-overlay {
+        background: rgba(0, 0, 0, 0.5);
+        color: #666666;
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        z-index: 5000;
+        top: 0;
+        left: 0;
+        float: left;
+        text-align: center;
+        padding-top: 25%;
+    }
+
+    .nav-link{
+      font-size: 1.9em;
+      height: 50px;
+      line-height: 50px;
+      position: relative;
+      top: 0;
+      width: 50px;
+      i {
+
+      }
+    }

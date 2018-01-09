@@ -5,13 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Bootstrap 101 Template</title>
+    <title>FreeCam - A free zoom alternative</title>
 
     <!-- Bootstrap -->
   <!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous"> -->
     <link href="style/bootstrap.min.css" rel="stylesheet" />
     <link href="style/custom.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="style/animation.css"><!--[if IE 7]><link rel="stylesheet" href="style/jitsi-ie7.css"><![endif]-->
+    <link rel="stylesheet" href="style/jitsi.css">
     <!-- HTML5 shim and Respond.js for IE8 support o f HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]> <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script> <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script> <![endif]-->
@@ -40,11 +41,13 @@
             </li>
           <!--  <li class="nav-item">
               <a class="nav-link" href="#" id="participantsButton">Participants</a>
-            </li>
+            </li> -->
             <li class="nav-item">
-              <a class="nav-link" href="#" id="screenShareButton">Share Screen</a>
+              <a class="nav-item" href="#" id="screenShareButton" data-toggle="tooltip" data-html="true" title="Tooltip on top">
+                <i class="icon-share-desktop"></i>
+              </a>
             </li>
-            <li class="nav-item">
+        <!--    <li class="nav-item">
               <a class="nav-link" href="#" id="chatButton">Chat</a>
             </li> -->
           </ul>
@@ -59,7 +62,10 @@
 
       <div class="camera-container" id="cameras">
         <div class="camera-wrap">
-          <video id="localVideo" oncontextmenu="return false;"></video>
+          <video id="localVideo" oncontextmenu="return false;" class="active"></video>
+          <div class="username" id="localUsername">
+            Test
+          </div>
         </div>
       </div>
 
@@ -83,7 +89,7 @@
           </div>
           <div class="modal-footer">
             <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-            <button type="button" class="btn btn-primary" id="joinMeetingButton">Join</button>
+            <button type="button" class="btn btn-primary" id="joinMeetingButton" enabled=false>Join</button>
           </div>
         </div>
       </div>
@@ -110,13 +116,32 @@
       </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <div id="load-overlay">
+      <img src="images/Spinner.gif" alt="Loading" /><br/>
+      Loading...
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
     <script src="js/simplewebrtc.bundle.js"></script>
+    <script src="js/cookies.js"></script>
     <script type="text/javascript">
     var room = location.search && location.search.split('?')[1];
+      //    usernameInput
+          var usernameCookie = getCookie("freecam-username");
+          if (usernameCookie != null){
+            $('#usernameInput')[0].value = usernameCookie;
+          }
 
+          if (room){
+            $('#meetingIdInput')[0].value = room;
+            $('#joinRoomModal').modal();
+          }
+
+          $(window).ready(function(){
+            $('#load-overlay').fadeOut();
+          });
           // create our webrtc connection
           var webrtc = new SimpleWebRTC({
               // the id/element dom element that will hold "our" video
@@ -126,55 +151,48 @@
               // immediately ask for camera access
               autoRequestMedia: true,
               debug: false,
-              detectSpeakingEvents: true
+              detectSpeakingEvents: true,
+              nick: $('#usernameInput')[0].value,
+              media: {
+                  audio: false,
+                  video: true
+              }
+
           });
 
-          // when it's ready, join if we got a room from the URL
           webrtc.on('readyToCall', function () {
-              // you can name it anything
-              if (room) {
-                webrtc.joinRoom(room);
-              }else {
-                $('#joinRoomModal').modal();
-              }
+            $('#joinMeetingButton')[0].enabled = true;
           });
 
-          function showVolume(el, volume) {
-            /*  if (!el) return;
-              if (volume < -45) { // vary between -45 and -20
-                  el.style.height = '0px';
-              } else if (volume > -20) {
-                  el.style.height = '100%';
-              } else {
-                  el.style.height = '' + Math.floor((volume + 100) * 100 / 25 - 220) + '%';
-              }*/
-          }
           webrtc.on('channelMessage', function (peer, label, data) {
-              if (data.type == 'volume') {
-                  showVolume(document.getElementById('volume_' + peer.id), data.volume);
-              }
+
           });
+
           webrtc.on('videoAdded', function (video, peer) {
               console.log('video added', peer);
-              var remotes = document.getElementById('cameras');
-              if (remotes) {
-                  var d = document.createElement('div');
-                  d.className = 'camera-wrap';
-                  d.id = 'container_' + webrtc.getDomId(peer);
-                  d.appendChild(video);
-                  //var vol = document.createElement('div');
-                //  vol.id = 'volume_' + peer.id;
-              //    vol.className = 'volume_bar';
-              //    video.onclick = function () {
-              //        video.style.width = video.videoWidth + 'px';
-              //        video.style.height = video.videoHeight + 'px';
-            //      };
-              //    d.appendChild(vol);
-                  remotes.appendChild(d);
+              if (peer.type == "video"){
+                var remotes = document.getElementById('cameras');
+                if (remotes) {
+                    var d = document.createElement('div');
+                    d.className = 'camera-wrap';
+                    d.id = 'container_' + webrtc.getDomId(peer);
+                    d.appendChild(video);
+
+                    var usernameDiv = document.createElement('div');
+                    usernameDiv.className = "username";
+                    usernameDiv.id = "username_" + webrtc.getDomId(peer);
+                    usernameDiv.innerHTML = peer.nick;
+                    d.appendChild(usernameDiv);
+
+                    remotes.appendChild(d);
+                }
+              } else if (peer.type == "screen") {
+
               }
 
               makeEqualSize();
           });
+
           webrtc.on('videoRemoved', function (video, peer) {
               console.log('video removed ', peer);
               var remotes = document.getElementById('cameras');
@@ -185,27 +203,12 @@
 
               makeEqualSize();
           });
-          webrtc.on('volumeChange', function (volume, treshold) {
-              //console.log('own volume', volume);
-              showVolume(document.getElementById('localVolume'), volume);
-          });
 
           // Since we use this twice we put it here
           function setRoom(name) {
-              /*$('form').remove();
-              $('h1').text(name);
-              $('#subTitle').text('Link to join: ' + location.href);
-              $('body').addClass('active'); */
-
               var newUrl = location.pathname + '?' + name;
               history.replaceState({foo: 'bar'}, null, newUrl);
-              $('#meetingLinkInput')[0].value = newUrl;
-          }
-
-          if (room) {
-              setRoom(room);
-          } else {
-              $('#joinRoomModal').modal();
+              $('#meetingLinkInput')[0].value = location.href;
           }
 
           var videoToggle = $('#joinVideo'),
@@ -249,14 +252,19 @@
 
           var button = $('#screenShareButton'),
               setButton = function (bool) {
-                  button.text(bool ? 'Share Screen' : 'Stop Sharing');
+                  button.title = (bool ? 'Share Screens' : 'Stop Sharing');
               };
+
+        if (!webrtc.capabilities.supportScreenSharing) {
+            button.disabled = 'disabled';
+          }
+
           webrtc.on('localScreenStopped', function () {
               setButton(true);
           });
 
           setButton(true);
-          setAudio(false);
+          setAudio(true);
           setVideo(false);
 
           button.click(function () {
@@ -278,10 +286,18 @@
           $('#leaveMeeting').click(function () {
             webrtc.leaveRoom();
             webrtc.pauseVideo();
+            $('#usernameInput')[0].value = webrtc.webrtc.config.nick;
             $('#joinRoomModal').modal();
           });
 
           $('#joinMeetingButton').click(function () {
+            webrtc.webrtc.config.nick = $('#usernameInput')[0].value;
+            $('#localUsername')[0].innerHTML = webrtc.webrtc.config.nick;
+
+            if (webrtc.webrtc.config.nick){
+              setCookie("freecam-username", webrtc.webrtc.config.nick, 356);
+            }
+
             var name = $('#meetingIdInput')[0].value;
             webrtc.joinRoom(name);
             setRoom(name);
