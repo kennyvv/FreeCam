@@ -20,30 +20,29 @@
   <body>
     <div class="navbar navbar-expand-lg fixed-bottom navbar-dark bg-dark">
       <div class="container">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbar2" aria-controls="navbar2" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Collection of nav links and other content for toggling -->
-        <div class="navbar-collapse collapse" id="navbar2">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="#" id="joinAudio">Join Audio</a>
+              <a class="nav-link" href="#" id="joinAudio" data-toggle="tooltip" data-html="true" title="Join Audio">
+                <i class="icon-microphone" id="joinAudio-icon"></i>
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" id="joinVideo">Join Video</a>
+              <a class="nav-link" href="#" id="joinVideo" data-toggle="tooltip" data-html="true" title="Join Video">
+                <i class="icon-camera-disabled" id="joinVideo-icon"></i>
+              </a>
             </li>
           </ul>
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#" id="inviteButton">Invite</a>
+              <a class="nav-link" href="#" id="inviteButton" data-toggle="tooltip" data-html="true" title="Invite">
+                <i class="icon-link"></i>
+              </a>
             </li>
           <!--  <li class="nav-item">
               <a class="nav-link" href="#" id="participantsButton">Participants</a>
             </li> -->
             <li class="nav-item">
-              <a class="nav-item" href="#" id="screenShareButton" data-toggle="tooltip" data-html="true" title="Tooltip on top">
+              <a class="nav-link" href="#" id="screenShareButton" data-toggle="tooltip" data-html="true" title="Share Screen">
                 <i class="icon-share-desktop"></i>
               </a>
             </li>
@@ -53,11 +52,12 @@
           </ul>
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#" id="leaveMeeting" style="color: red; font-weight: bold;">Leave Meeting</a>
+              <a class="nav-link" href="#" id="leaveMeeting" data-toggle="tooltip" data-html="true" title="<b style='color: red;'>Leave Meeting</b>">
+                <i class="icon-hangup"></i>
+              </a>
             </li>
           </ul>
         </div>
-      </div>
     </div>
 
       <div class="camera-container" id="cameras">
@@ -127,7 +127,8 @@
     <script src="js/simplewebrtc.bundle.js"></script>
     <script src="js/cookies.js"></script>
     <script type="text/javascript">
-    var room = location.search && location.search.split('?')[1];
+          $("a").tooltip();
+          var room = location.search && location.search.split('?')[1];
       //    usernameInput
           var usernameCookie = getCookie("freecam-username");
           if (usernameCookie != null){
@@ -136,11 +137,11 @@
 
           if (room){
             $('#meetingIdInput')[0].value = room;
-            $('#joinRoomModal').modal();
           }
 
           $(window).ready(function(){
             $('#load-overlay').fadeOut();
+            $('#joinRoomModal').modal();
           });
           // create our webrtc connection
           var webrtc = new SimpleWebRTC({
@@ -170,7 +171,7 @@
 
           webrtc.on('videoAdded', function (video, peer) {
               console.log('video added', peer);
-              if (peer.type == "video"){
+//
                 var remotes = document.getElementById('cameras');
                 if (remotes) {
                     var d = document.createElement('div');
@@ -186,9 +187,9 @@
 
                     remotes.appendChild(d);
                 }
-              } else if (peer.type == "screen") {
+          //    } else if (peer.type == "screen") {
 
-              }
+            //  }
 
               makeEqualSize();
           });
@@ -213,7 +214,8 @@
 
           var videoToggle = $('#joinVideo'),
              setVideo = function(bool) {
-               videoToggle.text(bool ? 'Join Video' : 'Leave Video');
+               videoToggle.attr('data-original-title', (bool ? 'Join Video' : 'Leave Video'));
+               $('#joinVideo-icon').class = (bool ? "icon-camera" : "icon-camera-disabled");
              };
 
          videoToggle.click(function () {
@@ -226,7 +228,8 @@
 
           var audioToggle = $('#joinAudio'),
              setAudio = function(bool) {
-               audioToggle.text(bool ? 'Join Audio' : 'Leave Audio');
+               audioToggle.attr('data-original-title', (bool ? 'Join Audio' : 'Leave Audio'));
+                $('#joinAudio-icon').class = (bool ? "icon-microphone" : "icon-mic-disabled");
              };
 
          audioToggle.click(function () {
@@ -252,7 +255,7 @@
 
           var button = $('#screenShareButton'),
               setButton = function (bool) {
-                  button.title = (bool ? 'Share Screens' : 'Stop Sharing');
+                button.attr('data-original-title', (bool ? 'Share Screens (Not finished!)' : 'Stop Sharing'));
               };
 
         if (!webrtc.capabilities.supportScreenSharing) {

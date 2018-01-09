@@ -211,14 +211,32 @@ body {
         padding-top: 25%;
     }
 
-    .nav-link{
-      font-size: 1.9em;
-      height: 50px;
-      line-height: 50px;
-      position: relative;
-      top: 0;
-      width: 50px;
+    .navbar-nav{
+      max-height: 55px;
+    }
+    .nav-item{
       i {
+        font-size: 1.9em;
+        height: 43px;
+        line-height: 43px;
+        top: 0;
+        width: 43px;
+      }
+    }
 
+    @include tablet-landscape-and-below {
+      .navbar-nav{
+        display: inline-block;
+      }
+
+      .nav-item{
+        display: inline-block;
+        i {
+          font-size: 1.9em;
+          height: 25px;
+          line-height: 25px;
+          top: 0;
+          width: 25px;
+        }
       }
     }
