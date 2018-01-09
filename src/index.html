@@ -82,15 +82,14 @@
           var wrap = $('.camera-container');
           var elements = $(".camera-container").find('.camera-wrap');
 
-          var windowWidth = wrap.width();
-          var windowHeight = wrap.height();
+          var windowWidth = wrap.width() - (count * margin);
+          var windowHeight = wrap.height() - (count * margin);
 
-          var count = elements.length;
           var rows = Math.floor(Math.sqrt(count));
           var cols = Math.ceil(Math.sqrt(count));
 
-          var elWidth = (windowWidth / cols);
-          var elHeight = (windowHeight / rows);
+          var elWidth = ((windowWidth - (count * margin))  / cols);
+          var elHeight = ((windowHeight - (count * margin)) / cols);
 
           elements.css({
             width: elWidth + "px",
