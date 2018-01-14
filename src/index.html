@@ -34,6 +34,11 @@
           </ul>
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
+              <a class="nav-link" href="#" id="settingsLink" data-toggle="tooltip" data-html="true" title="Settings">
+                <i class="icon-settings" id="settingsLink-icon"></i>
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="#" id="inviteButton" data-toggle="tooltip" data-html="true" title="Invite">
                 <i class="icon-link"></i>
               </a>
@@ -51,6 +56,7 @@
             </li> -->
           </ul>
           <ul class="navbar-nav ml-auto">
+
             <li class="nav-item">
               <a class="nav-link" href="#" id="leaveMeeting" data-toggle="tooltip" data-html="true" title="<b style='color: red;'>Leave Meeting</b>">
                 <i class="icon-hangup"></i>
@@ -73,7 +79,7 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Join Meeting</h5>
+            <h5 class="modal-title">Join Meeting</h5>
           </div>
           <div class="modal-body">
             <form>
@@ -99,7 +105,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Invite People</h5>
+            <h5 class="modal-title">Invite People</h5>
           </div>
           <div class="modal-body">
             <form>
@@ -116,6 +122,42 @@
       </div>
     </div>
 
+    <div class="modal bd-example-modal-lg" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Settings</h5>
+          </div>
+          <div class="modal-body">
+            <center>
+              This shit doesn't work yet. ;)
+            </center>
+            <div class="row">
+              <div class="col-sm-6">
+                <video id="videoPreview" oncontextmenu="return false;" class="active"></video>
+              </div>
+              <div class="col-sm-6">
+                <form>
+                  <div class="form-group">
+                    <label for="audioInput" class="form-control-label">Audio Source:</label>
+                    <select class="form-control" id="audioInput"></select>
+                  </div>
+                  <div class="form-group">
+                    <label for="videoInput" class="form-control-label">Video Source:</label>
+                    <select class="form-control" id="videoInput"></select>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="load-overlay">
       <img src="images/Spinner.gif" alt="Loading" /><br/>
       Loading...
@@ -126,236 +168,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
     <script src="js/simplewebrtc.bundle.js"></script>
     <script src="js/cookies.js"></script>
-    <script type="text/javascript">
-          $("a").tooltip();
-          var room = location.search && location.search.split('?')[1];
-      //    usernameInput
-          var usernameCookie = getCookie("freecam-username");
-          if (usernameCookie != null){
-            $('#usernameInput')[0].value = usernameCookie;
-          }
-
-          if (room){
-            $('#meetingIdInput')[0].value = room;
-          }
-
-          $(window).ready(function(){
-            $('#load-overlay').fadeOut();
-            $('#joinRoomModal').modal();
-          });
-          // create our webrtc connection
-          var webrtc = new SimpleWebRTC({
-              // the id/element dom element that will hold "our" video
-              localVideoEl: 'localVideo',
-              // the id/element dom element that will hold remote videos
-              remoteVideosEl: '',
-              // immediately ask for camera access
-              autoRequestMedia: true,
-              debug: false,
-              detectSpeakingEvents: true,
-              nick: $('#usernameInput')[0].value,
-              media: {
-                  audio: false,
-                  video: true
-              }
-
-          });
-
-          webrtc.on('readyToCall', function () {
-            $('#joinMeetingButton')[0].enabled = true;
-          });
-
-          webrtc.on('channelMessage', function (peer, label, data) {
-
-          });
-
-          webrtc.on('videoAdded', function (video, peer) {
-              console.log('video added', peer);
-//
-                var remotes = document.getElementById('cameras');
-                if (remotes) {
-                    var d = document.createElement('div');
-                    d.className = 'camera-wrap';
-                    d.id = 'container_' + webrtc.getDomId(peer);
-                    d.appendChild(video);
-
-                    var usernameDiv = document.createElement('div');
-                    usernameDiv.className = "username";
-                    usernameDiv.id = "username_" + webrtc.getDomId(peer);
-                    usernameDiv.innerHTML = peer.nick;
-                    d.appendChild(usernameDiv);
-
-                    remotes.appendChild(d);
-                }
-          //    } else if (peer.type == "screen") {
-
-            //  }
-
-              makeEqualSize();
-          });
-
-          webrtc.on('videoRemoved', function (video, peer) {
-              console.log('video removed ', peer);
-              var remotes = document.getElementById('cameras');
-              var el = document.getElementById('container_' + webrtc.getDomId(peer));
-              if (remotes && el) {
-                  remotes.removeChild(el);
-              }
-
-              makeEqualSize();
-          });
-
-          // Since we use this twice we put it here
-          function setRoom(name) {
-              var newUrl = location.pathname + '?' + name;
-              history.replaceState({foo: 'bar'}, null, newUrl);
-              $('#meetingLinkInput')[0].value = location.href;
-          }
-
-          var videoToggle = $('#joinVideo'),
-             setVideo = function(bool) {
-               videoToggle.attr('data-original-title', (bool ? 'Join Video' : 'Leave Video'));
-               $('#joinVideo-icon').class = (bool ? "icon-camera" : "icon-camera-disabled");
-             };
-
-         videoToggle.click(function () {
-           if (webrtc.webrtc.isVideoEnabled()){
-             webrtc.pauseVideo();
-           }else{
-             webrtc.resumeVideo();
-           }
-         });
-
-          var audioToggle = $('#joinAudio'),
-             setAudio = function(bool) {
-               audioToggle.attr('data-original-title', (bool ? 'Join Audio' : 'Leave Audio'));
-                $('#joinAudio-icon').class = (bool ? "icon-microphone" : "icon-mic-disabled");
-             };
-
-         audioToggle.click(function () {
-           if (webrtc.webrtc.isAudioEnabled()){
-             webrtc.mute();
-           }else{
-             webrtc.unmute();
-           }
-         });
-
-         webrtc.on('audioOn', function () {
-           setAudio(false);
-         });
-         webrtc.on('audioOff', function () {
-             setAudio(true);
-         });
-         webrtc.on('videoOn', function () {
-             setVideo(false);
-         });
-         webrtc.on('videoOff', function () {
-             setVideo(true);
-         });
-
-          var button = $('#screenShareButton'),
-              setButton = function (bool) {
-                button.attr('data-original-title', (bool ? 'Share Screens (Not finished!)' : 'Stop Sharing'));
-              };
-
-        if (!webrtc.capabilities.supportScreenSharing) {
-            button.disabled = 'disabled';
-          }
-
-          webrtc.on('localScreenStopped', function () {
-              setButton(true);
-          });
-
-          setButton(true);
-          setAudio(true);
-          setVideo(false);
-
-          button.click(function () {
-              if (webrtc.getLocalScreen()) {
-                  webrtc.stopScreenShare();
-                  setButton(true);
-              } else {
-                  webrtc.shareScreen(function (err) {
-                      if (err) {
-                          setButton(true);
-                      } else {
-                          setButton(false);
-                      }
-                  });
-
-              }
-          });
-
-          $('#leaveMeeting').click(function () {
-            webrtc.leaveRoom();
-            webrtc.pauseVideo();
-            $('#usernameInput')[0].value = webrtc.webrtc.config.nick;
-            $('#joinRoomModal').modal();
-          });
-
-          $('#joinMeetingButton').click(function () {
-            webrtc.webrtc.config.nick = $('#usernameInput')[0].value;
-            $('#localUsername')[0].innerHTML = webrtc.webrtc.config.nick;
-
-            if (webrtc.webrtc.config.nick){
-              setCookie("freecam-username", webrtc.webrtc.config.nick, 356);
-            }
-
-            var name = $('#meetingIdInput')[0].value;
-            webrtc.joinRoom(name);
-            setRoom(name);
-            webrtc.resumeVideo();
-            $('#joinRoomModal').modal('hide');
-          });
-
-          $('#inviteButton').click(function () {
-            $('#showInviteLinkModal').modal('toggle');
-          });
-
-          $('#meetingLinkInput').click(function () {
-            $(this).select();
-          });
-
-          function getRandomInt(min, max) {
-              return Math.floor(Math.random() * (max - min + 1)) + min;
-          }
-
-          function makeEqualSize() {
-            var wrap = $('.camera-container');
-            var elements = $(".camera-container").find('.camera-wrap');
-
-            var count = elements.length;
-            var margin = 6;
-            var windowWidth = wrap.width() - (count * margin);
-            var windowHeight = wrap.height() - (count * margin);
-
-            var rows = Math.floor(Math.sqrt(count));
-            var cols = Math.ceil(Math.sqrt(count));
-
-            var elWidth = ((windowWidth - (count * margin))  / cols);
-          //  var elHeight = ((windowHeight - (count * margin)) / rows);
-            var elHeight = elWidth * 0.5625;
-
-            if (windowWidth * 1.5625 < windowHeight){
-              elHeight = ((windowWidth - (count * margin)) / cols);
-              elWidth = ((windowHeight - (count * margin)) / rows);
-            }
-
-            elements.css({
-              width: elWidth + "px",
-              height: elHeight + "px"
-            });
-
-          }
-
-      $(document).ready(function () {
-        $(window).resize(function (e) {
-          makeEqualSize();
-        });
-
-        makeEqualSize()
-      });
-    </script>
-
+    <script src="js/custom.js"></script>
   </body>
 </html>

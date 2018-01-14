@@ -15194,6 +15194,12 @@ function isAllTracksEnded(stream) {
     return isAllTracksEnded;
 }
 
+function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
 function Peer(options) {
     var self = this;
 
@@ -15292,7 +15298,7 @@ Peer.prototype.handleMessage = function (message) {
     if (message.prefix) this.browserPrefix = message.prefix;
 
     if (message.type === 'offer') {
-        if (!this.nick) this.nick = message.payload.nick;
+        if (!this.nick) this.nick = escapeHtml(message.payload.nick);
         delete message.payload.nick;
         this.pc.handleOffer(message.payload, function (err) {
             if (err) {
@@ -15304,7 +15310,7 @@ Peer.prototype.handleMessage = function (message) {
             });
         });
     } else if (message.type === 'answer') {
-        if (!this.nick) this.nick = message.payload.nick;
+        if (!this.nick) this.nick = escapeHtml(message.payload.nick);
         delete message.payload.nick;
         this.pc.handleAnswer(message.payload);
     } else if (message.type === 'candidate') {
