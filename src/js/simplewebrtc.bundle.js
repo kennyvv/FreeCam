@@ -7414,6 +7414,7 @@ function isAllTracksEnded(stream) {
 }
 
 function shouldWorkAroundFirefoxStopStream() {
+  if (/Chrom(e|ium)/.test(navigator.userAgent)) { return true; }
   if (typeof window === 'undefined') {
     return false;
   }
@@ -15814,6 +15815,7 @@ SimpleWebRTC.prototype.setVolumeForAll = function (volume) {
 
 SimpleWebRTC.prototype.joinRoom = function (name, cb) {
     var self = this;
+    this.isHost = false;
     this.roomName = name;
     this.connection.emit('join', name, function (err, roomDescription) {
         console.log('join CB', err, roomDescription);
@@ -15939,6 +15941,7 @@ SimpleWebRTC.prototype.testReadiness = function () {
 
 SimpleWebRTC.prototype.createRoom = function (name, cb) {
     this.roomName = name;
+    this.isHost = true;
     if (arguments.length === 2) {
         this.connection.emit('create', name, cb);
     } else {

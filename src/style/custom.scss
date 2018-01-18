@@ -145,24 +145,13 @@ body {
   width: 100vw;
   height: 90vh;
   margin-top: 15px;
-
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-  align-items:  baseline;
-  -webkit-flex-flow: row wrap;
-  justify-content: space-around;
-
-
+	text-align: center;
+	
   @include mobile-portrait-and-below {
-    flex-direction: row;
     overflow: auto;
   }
 
   @include tablet-landscape-and-below {
-    flex-direction: row;
     overflow: auto;
   }
 
@@ -176,11 +165,13 @@ body {
 		border: 2px solid black;
     text-align: center;
     position:relative;
+		display: inline-block;
+
 		//width: 640px;
 		//height: 480px;
 		//padding-top: 56.25%;
-  	display: flex;
-		flex: 0 1 auto;
+  	//display: flex;
+		//flex: 0 1 auto;
 
     video {
       background-image: url('../images/buddy.svg');

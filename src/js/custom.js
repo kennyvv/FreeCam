@@ -87,7 +87,13 @@ var webrtc = new SimpleWebRTC({
     nick: $('#usernameInput')[0].value,
     media: {
         audio: false,
-        video: true
+        video: {
+          mandatory: {
+             minAspectRatio: 1.7777777778,
+             maxAspectRatio: 1.7777777778,
+             
+          }
+        }
     }
 });
 
@@ -264,9 +270,7 @@ function makeEqualSize() {
 
   var realCount = elements.length;
   var count = elements.length;
-  if (count % 2 != 0){
-    count += 1;
-  }
+
   var margin = 6;
   var windowWidth = wrap.width() - (count * margin);
   var windowHeight = wrap.height() - (count * margin);
@@ -274,30 +278,39 @@ function makeEqualSize() {
   var rows = Math.floor(Math.sqrt(count));
   var cols = Math.ceil(Math.sqrt(count));
 
-  if (realCount % 2 != 0 && realCount == cols){
+  if (count > 1 && count % 2 != 0){
     cols--;
+    rows++;
   }
 
-//  if (cols * rows > realCount){
-//    rows--;
-//  }
+  var remainder = elements.length % 2;
+  var elWidth = ((windowWidth - (count * margin))  / cols);
+  var elHeight = (elWidth * 0.5625);//((windowHeight - (count * margin))  / rows);
 
-  var elHeight = ((windowHeight - (count * margin))  / rows);
-  var elWidth = elHeight  * 1.5625;
-    if (windowHeight / count > windowWidth / count){
-
-    }
-    else
-    {
-      elWidth = ((windowWidth - (count * margin))  / cols);
+  if (count > 1){
+    while (elHeight * rows > (windowHeight - (count * margin))){
+      elWidth--;
       elHeight = (elWidth * 0.5625);
     }
+
+    if (elWidth < ((windowHeight - (count * margin))  / rows)){
+      var w = elWidth;
+      var h = elHeight;
+      elWidth = windowWidth - (margin * 2);
+      elHeight = elWidth * 0.5625;
+
+      while (elHeight * count > (windowHeight - (count * margin))){
+        elWidth--;
+        elHeight = (elWidth * 0.5625);
+      }
+    }
+  }
 
   elements.css({
     width: elWidth + "px",
     height: elHeight + "px"
   });
-  console.log("Rows: " + rows + " Cols: " + cols);
+  console.log("Items: " + count + " Rows: " + rows + " Cols: " + cols);
 }
 
 $(document).ready(function () {
